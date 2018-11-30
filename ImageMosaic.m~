@@ -109,13 +109,12 @@ height = size(img1,1);
 width = size(img1,2);
 xOverlap = width - Tx;
 
-finalImg1 = img1; % left side
-finalImg2 = img2; % right side
+finalImg = img2; % placeholder
 
 for y=1:height
     for x=1:width
         % Translate in img 1
-        xTrans=ceil(x+Tx);
+        xTrans=ceil(x-Tx);
         yTrans=ceil(y+Ty);
         if (xTrans<=0 || yTrans<=0)
             continue
@@ -123,34 +122,31 @@ for y=1:height
         
         if (x<xOverlap && (y+Ty)<=height) % if in overlap region and valid y
             % If both images non-black pixel
-            if ((img2(yTrans,xTrans,1)~=0||img2(yTrans,xTrans,2)~=0|| ...
-                 img2(yTrans,xTrans,3)~=0) && ...
-                (img1(y,x,1)~=0||img1(y,x,2)~=0||img1(y,x,3)~=0))
+            if ((img1(yTrans,xTrans,1)~=0||img1(yTrans,xTrans,2)~=0|| ...
+                 img1(yTrans,xTrans,3)~=0) && ...
+                (img2(y,x,1)~=0||img2(y,x,2)~=0||img2(y,x,3)~=0))
                 
-                scale1=0.5;
-                scale2=0.5;
-                finalImg2(yTrans,xTrans,:)=scale1.*img1(y,x,:)+scale2.*img2(yTrans,xTrans,:);
-                finalImg1(y,x,:)=scale1.*img1(y,x,:)+scale2.*img2(yTrans,xTrans,:);
+                scale1=(xOverlap-x)/xOverlap;
+                scale2=1-scale1;
+                finalImg(yTrans,xTrans,:)=scale1.*img1(yTrans,xTrans,:)+scale2.*img2(y,x,:);
+            
             % if Img1 black
             elseif (img1(yTrans,xTrans,1)==0&&img1(yTrans,xTrans,2)==0&& ...
                     img1(yTrans,xTrans,3)==0)
-%                 finalImg2(yTrans,xTrans,:)=img2(y,x,:);
-
+                finalImg(yTrans,xTrans,:)=img2(y,x,:);
             % if Img2 black
             elseif (img2(y,x,1)==0&&img2(y,x,2)==0&&img2(y,x,3)==0)
-%                 finalImg2(yTrans,xTrans,:)=img1(yTrans,xTrans,:);
+                finalImg(yTrans,xTrans,:)=img1(yTrans,xTrans,:);
+                
             end
         else
             % Not in overlap region
-%             finalImg2(yTrans,xTrans,:)=img2(y,x,:);
+            finalImg(yTrans,xTrans,:)=img2(y,x,:);
         end
     end
 end
 figure;
-subplot(1,2,1);
-imshow(finalImg2);
-subplot(1,2,2);
-imshow(finalImg1);
+imshow(finalImg);
 
 
 
