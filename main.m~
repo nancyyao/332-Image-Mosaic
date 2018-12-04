@@ -1,0 +1,22 @@
+%% Three-image example
+% img1 = imread('test_images/mudd_1.jpg');
+% img2 = imread('test_images/mudd_2.jpg');
+% img3 = imread('test_images/mudd_3.jpg');
+% 
+% % Stitch images 1 and 2
+% img12 = ImageMosaic(img1,img2);
+% 
+% % Stitch images 2 and 3
+% img23 = ImageMosaic(img2,img3);
+% 
+% % Stitch the results
+% img123 = ImageMosaic(img12,img23);
+% 
+% figure;
+% imshow(img123);
+
+
+%% Two-image example
+img_a = imread('test1_1.png');
+img_b = imread('test1_2.png');
+

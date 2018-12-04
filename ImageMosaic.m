@@ -1,6 +1,8 @@
+function stitchedImg = ImageMosaic(img1,img2)
+
 %% Use SIFT to get matches between images
-img1 = imread('test1_1.png');
-img2 = imread('test1_2.png');
+% img1 = imread('test_images/IMG_8808_8809.jpg');
+% img2 = imread('test_images/IMG_8809_8810.jpg');
 
 [f1, d1] = vl_sift(single(rgb2gray(img1))); % f: [x, y, s, th]
 [f2, d2] = vl_sift(single(rgb2gray(img2)));
@@ -124,12 +126,12 @@ for y=1:size(stitchedImg,1)
         yTrans=ceil(y+Ty);
         
         % If translated coordinates out of bounds of img2
-        if (xTrans>width2 || yTrans>height2)
-            continue
-        end
-        
+
         if x<abs(Tx)
             stitchedImg(y,x,:)=img1(y,x,:);
+        elseif (xTrans>width2 || yTrans>height2 || xTrans<1 || yTrans<1)
+            continue
+            
         elseif x>=abs(Tx) && x<width1
             % smaller x = closer to img1 = greater multiplier for img1
             scale1=(width1-x) / (width1-abs(Tx));
@@ -140,9 +142,8 @@ for y=1:size(stitchedImg,1)
         end
     end
 end
-figure;
-imshow(stitchedImg);
+% figure;
+% imshow(stitchedImg);
 
-
-
+end
 
