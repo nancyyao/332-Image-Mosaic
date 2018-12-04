@@ -124,12 +124,12 @@ for y=1:size(stitchedImg,1)
         % Translate img1 to get spot in img2
         xTrans=ceil(x+Tx);
         yTrans=ceil(y+Ty);
-        
-        % If translated coordinates out of bounds of img2
 
         if x<abs(Tx)
             stitchedImg(y,x,:)=img1(y,x,:);
+            
         elseif (xTrans>width2 || yTrans>height2 || xTrans<1 || yTrans<1)
+            % If translated coordinates out of bounds of img2
             continue
             
         elseif x>=abs(Tx) && x<width1
