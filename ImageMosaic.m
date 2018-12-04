@@ -86,7 +86,9 @@ figure();
 subplot(2,1,1);
 imagesc([padarray(img1,width_diff1,'post') padarray(img2,width_diff2,'post')]);
 img1_height = size(img1,2);
-line([f1(1,matches(1,:));f2(1,matches(2,:))+img1_height],[f1(2,matches(1,:));f2(2,matches(2,:))]);
+line([f1(1,matches(1,:));
+    f2(1,matches(2,:))+img1_height],[f1(2,matches(1,:));
+    f2(2,matches(2,:))]);
 title(sprintf('%d matches', numMatches));
 axis image off;
 
@@ -96,7 +98,9 @@ drawnow;
 subplot(2,1,2);
 imagesc([padarray(img1,width_diff1,'post') padarray(img2,width_diff2,'post')]);
 img1_height = size(img1,2);
-line([f1(1,matches(1,inlierIndices));f2(1,matches(2,inlierIndices))+img1_height],[f1(2,matches(1,inlierIndices));f2(2,matches(2,inlierIndices))]);
+line([f1(1,matches(1,inlierIndices));
+    f2(1,matches(2,inlierIndices))+img1_height],[f1(2,matches(1,inlierIndices));
+    f2(2,matches(2,inlierIndices))]);
 title(sprintf('%d inliner matches', count));
 axis image off;
 
@@ -105,52 +109,39 @@ drawnow ;
 %% Stitching
 Tx = H(1,3);
 Ty = H(2,3);
-height = size(img1,1);
-width = size(img1,2);
-xOverlap = width - Tx;
+height1 = size(img1,1);
+width1 = size(img1,2);
+height2 = size(img2,1);
+width2 = size(img2,2);
+overlap = width1 - abs(Tx);
 
-finalImg1 = img1; % left side
-finalImg2 = img2; % right side
+stitchedImg = uint8(zeros(height1, ceil(width1+width2 - overlap),3));
 
-for y=1:height
-    for x=1:width
-        % Translate in img 1
+for y=1:size(stitchedImg,1)
+    for x=1:size(stitchedImg,2)
+        % Translate img1 to get spot in img2
         xTrans=ceil(x+Tx);
         yTrans=ceil(y+Ty);
-        if (xTrans<=0 || yTrans<=0)
+        
+        % If translated coordinates out of bounds of img2
+        if (xTrans>width2 || yTrans>height2)
             continue
         end
         
-        if (x<xOverlap && (y+Ty)<=height) % if in overlap region and valid y
-            % If both images non-black pixel
-            if ((img2(yTrans,xTrans,1)~=0||img2(yTrans,xTrans,2)~=0|| ...
-                 img2(yTrans,xTrans,3)~=0) && ...
-                (img1(y,x,1)~=0||img1(y,x,2)~=0||img1(y,x,3)~=0))
-                
-                scale1=0.5;
-                scale2=0.5;
-                finalImg2(yTrans,xTrans,:)=scale1.*img1(y,x,:)+scale2.*img2(yTrans,xTrans,:);
-                finalImg1(y,x,:)=scale1.*img1(y,x,:)+scale2.*img2(yTrans,xTrans,:);
-            % if Img1 black
-            elseif (img1(yTrans,xTrans,1)==0&&img1(yTrans,xTrans,2)==0&& ...
-                    img1(yTrans,xTrans,3)==0)
-%                 finalImg2(yTrans,xTrans,:)=img2(y,x,:);
-
-            % if Img2 black
-            elseif (img2(y,x,1)==0&&img2(y,x,2)==0&&img2(y,x,3)==0)
-%                 finalImg2(yTrans,xTrans,:)=img1(yTrans,xTrans,:);
-            end
+        if x<abs(Tx)
+            stitchedImg(y,x,:)=img1(y,x,:);
+        elseif x>=abs(Tx) && x<width1
+            % smaller x = closer to img1 = greater multiplier for img1
+            scale1=(width1-x) / (width1-abs(Tx));
+            scale2=1-scale1;
+            stitchedImg(y,x,:)=scale1.*img1(y,x,:)+scale2.*img2(yTrans,xTrans,:);
         else
-            % Not in overlap region
-%             finalImg2(yTrans,xTrans,:)=img2(y,x,:);
+            stitchedImg(y,x,:)=img2(yTrans,xTrans,:);
         end
     end
 end
 figure;
-subplot(1,2,1);
-imshow(finalImg2);
-subplot(1,2,2);
-imshow(finalImg1);
+imshow(stitchedImg);
 
 
 
